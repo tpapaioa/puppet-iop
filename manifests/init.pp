@@ -123,6 +123,17 @@ class iop (
     database_password => $remediations_database_password,
   }
 
+  # Manage the iop_enabled setting in Foreman
+  # This ensures reliable IoP detection during application boot,
+  # avoiding race conditions between plugin registration and SmartProxy availability
+  foreman_config_entry { 'iop_enabled':
+    value          => $ensure ? {
+      'present' => true,
+      'absent'  => false,
+    },
+    ignore_missing => false,
+  }
+
   if $register_as_smartproxy {
     $oauth_consumer_key = extlib::cache_data('foreman_cache_data', 'oauth_consumer_key', extlib::random_password(32))
     $oauth_consumer_secret = extlib::cache_data('foreman_cache_data', 'oauth_consumer_secret', extlib::random_password(32))
